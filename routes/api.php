@@ -17,3 +17,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/test', function () {
+    \Illuminate\Support\Facades\Log::debug('test debug log');
+    return ['test'];
+});

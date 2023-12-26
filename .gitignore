@@ -5,6 +5,7 @@
 /public/storage
 /storage/*.key
 /vendor
+/pg-data
 .env
 .env.backup
 .env.production
