@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: points-laravel-app
+    container_name: points-laravel-app
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    environment:
+      - DB_CONNECTION=pgsql
+      - DB_HOST=points-postgres
+      - DB_PORT=5432
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+
+  postgres:
+    image: postgres:alpine
+    container_name: points-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${DB_DATABASE}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./${DB_STORAGE}:/var/lib/postgresql/data
+    command: ["postgres", "-c", "shared_preload_libraries=earthdistance"]
+
+  redis:
+    image: redis:latest
+    container_name: points-redis
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:latest
+    container_name: points-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - .:/var/www/html
+
+networks:
+  default:
+    driver: bridge
+#
+#volumes:
+#  pg-data:
+#    driver: local
