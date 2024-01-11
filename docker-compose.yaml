@@ -4,9 +4,26 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/php-fpm/Dockerfile
     image: points-laravel-app
     container_name: points-laravel-app
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    environment:
+      - DB_CONNECTION=pgsql
+      - DB_HOST=points-postgres
+      - DB_PORT=5432
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/php-fpm/Dockerfile
+    image: points-laravel-worker
+    container_name: points-laravel-worker
     restart: unless-stopped
     volumes:
       - .:/var/www/html

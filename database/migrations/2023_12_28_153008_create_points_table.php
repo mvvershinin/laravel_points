@@ -11,14 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('points', function (Blueprint $table) {
             $table->id();
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
+            $table->float('lat');
+            $table->float('lon');
+            $table->integer('address_id')->nullable();
+            $table->integer('user_id')->nullable();
             $table->timestamps();
         });
+
+        Schema::table('points', function (Blueprint $table) {
+            $table->index(['created_at', 'user_id']);
+        });
+
     }
 
     /**
@@ -26,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('points');
     }
 };

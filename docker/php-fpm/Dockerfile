@@ -18,11 +18,12 @@ WORKDIR /var/www/html
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN composer install --no-scripts --no-autoloader
+#RUN composer install --no-scripts --no-autoloader
 
-RUN composer dump-autoload
+#RUN composer dump-autoload
 
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN ls
+#RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 9000
 

@@ -1,0 +1,259 @@
+openapi: 3.0.0
+info:
+  title: Laravel Authentication API
+  version: 1.0.0
+paths:
+  /api/auth/register:
+    post:
+      summary: User Registration
+      tags:
+        - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Successful registration
+          content:
+            application/json:
+              example:
+                status: success
+                token: ACCESS_TOKEN
+                refresh_token: REFRESH_TOKEN
+        '422':
+          description: Falidation failed
+          content:
+            application/json:
+              example:
+                "status": error,
+                "errorCode": 422,
+                "details": {
+                  "email": [
+                    "The email field must be a valid email address."
+                  ]
+                }
+
+  /api/auth/login:
+    post:
+      summary: User Login
+      tags:
+        - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '202':
+          description: Successful login
+          content:
+            application/json:
+              example:
+                status: success
+                token: ACCESS_TOKEN
+                refresh_token: REFRESH_TOKEN
+
+  /api/auth/refresh-token:
+    get:
+      summary: Refresh Access Token
+      tags:
+        - Auth
+      security:
+        - RefreshToken: [ ]
+      responses:
+        '202':
+          description: Successful token refresh
+          content:
+            application/json:
+              example:
+                status: success
+                token: NEW_ACCESS_TOKEN
+                refresh_token: NEW_REFRESH_TOKEN
+
+  /api/coordinates/points:
+    post:
+      summary: Store a new coordinate point
+      tags:
+        - Coordinates
+      security:
+        - AccessToken: [ ]
+      requestBody:
+        description: Point lat lon to be stored
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PointStoreRequest'
+      responses:
+        '201':
+          description: Point successfully stored
+          content:
+            application/json:
+              example:
+                status: success
+                result: string
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              example:
+                status: error
+                message: Bad request
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                status: error
+                message: Unauthorized
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: error
+                message: Internal Server Error
+
+    get:
+      summary: Get points
+      tags:
+        - Coordinates
+      security:
+        - AccessToken: [ ]
+      parameters:
+        - name: user_id
+          in: query
+          description: User ID
+          required: true
+          schema:
+            type: integer
+        - name: from
+          in: query
+          description: Start date
+          required: true
+          schema:
+            type: string
+            example: 2024-01-10 19:32:07
+            format: date-time
+        - name: to
+          in: query
+          description: End date
+          required: true
+          schema:
+            type: string
+            example: 2024-01-10 21:32:07
+            format: date-time
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          schema:
+            type: integer
+            default: 1
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PointsResource'
+
+components:
+  schemas:
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        password_confirmation:
+          type: string
+      required:
+        - email
+        - password
+        - password_confirmation
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    PointStoreRequest:
+      type: object
+      properties:
+        lat:
+          type: number
+          format: double
+          description: Latitude of the coordinate point
+        lon:
+          type: number
+          format: double
+          description: Longitude of the coordinate point
+      required:
+        - lat
+        - lon
+
+    PointsResource:
+      type: object
+      properties:
+        status:
+          type: string
+        result:
+          type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Point'
+            meta:
+              type: object
+              properties:
+                pagination:
+                  type: object
+                  properties:
+                    total:
+                      type: integer
+                    per_page:
+                      type: integer
+                    current_page:
+                      type: integer
+                  required:
+                    - total
+                    - per_page
+                    - current_page
+    Point:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 123
+        lat:
+          type: number
+          example: 80.0000111
+        lon:
+          type: number
+          example: 54.0000111
+        address:
+          type: string
+          example: Address string
+
+  securitySchemes:
+    RefreshToken:
+      type: apiKey
+      scheme: bearer
+      in: header
+      name: Bearer
+    AccessToken:
+      type: apiKey
+      scheme: bearer
+      in: header
+      name: Bearer
